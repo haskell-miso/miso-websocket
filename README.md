@@ -1,4 +1,4 @@
-# :ramen: miso-websocket
+# :ramen: 🔌 miso-websocket
 
 ## Build and run
 
