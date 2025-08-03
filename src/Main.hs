@@ -1,34 +1,28 @@
+-----------------------------------------------------------------------------
 {-# LANGUAGE CPP                   #-}
-{-# LANGUAGE DeriveGeneric         #-}
-{-# LANGUAGE ExtendedDefaultRules  #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeFamilies          #-}
-
+-----------------------------------------------------------------------------
 module Main where
-
+-----------------------------------------------------------------------------
 import           Control.Monad.State
 import           Data.Aeson
 import           Data.Bool
 import           GHC.Generics
-
+-----------------------------------------------------------------------------
 import           Miso
 import           Miso.String (MisoString)
 import qualified Miso.String as S
-
 import qualified Miso.Style as CSS
-
+-----------------------------------------------------------------------------
 #if WASM
 foreign export javascript "hs_start" main :: IO ()
 #endif
-
+-----------------------------------------------------------------------------
 main :: IO ()
-main = run (startComponent app)
-
-app :: Component Model Action
+main = run (startApp app)
+-----------------------------------------------------------------------------
+app :: App Model Action
 app = (component emptyModel updateModel appView)
   { events = defaultEvents <> keyboardEvents
   , subs =
@@ -37,12 +31,11 @@ app = (component emptyModel updateModel appView)
   } where
       url = URL "wss://echo.websocket.org"
       protocols = Protocols []
-
-
+-----------------------------------------------------------------------------
 emptyModel :: Model
 emptyModel = Model (Message "") mempty
-
-updateModel :: Action -> Effect Model Action
+-----------------------------------------------------------------------------
+updateModel :: Action -> Transition Model Action
 updateModel (HandleWebSocket (WebSocketMessage (Message m))) =
   modify $ \model -> model { received = m }
 updateModel (SendMessage msg) =
@@ -50,25 +43,25 @@ updateModel (SendMessage msg) =
 updateModel (UpdateMessage m) = do
   modify $ \model -> model { msg = Message m }
 updateModel _ = pure ()
-
+-----------------------------------------------------------------------------
 instance ToJSON Message
 instance FromJSON Message
-
+-----------------------------------------------------------------------------
 newtype Message = Message MisoString
   deriving (Eq, Show, Generic)
-
+-----------------------------------------------------------------------------
 data Action
   = HandleWebSocket (WebSocket Message)
   | SendMessage Message
   | UpdateMessage MisoString
   | Id
-
+-----------------------------------------------------------------------------
 data Model = Model
   { msg :: Message
   , received :: MisoString
   } deriving (Show, Eq)
-
-appView :: Model -> View Action
+-----------------------------------------------------------------------------
+appView :: Model -> View Model Action
 appView Model{..} =
     div_
         [ CSS.style_ [ CSS.textAlign "center" ] ]
@@ -91,6 +84,7 @@ appView Model{..} =
             [text (S.pack "Send to echo server")]
         , div_ [] [p_ [] [text received | not . S.null $ received]]
         ]
-
+-----------------------------------------------------------------------------
 onEnter :: Action -> Attribute Action
 onEnter action = onKeyDown $ bool Id action . (== KeyCode 13)
+-----------------------------------------------------------------------------
