@@ -1,90 +1,90 @@
 -----------------------------------------------------------------------------
-{-# LANGUAGE CPP                   #-}
-{-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE TypeApplications           #-}
+{-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE RecordWildCards            #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE CPP                        #-}
 -----------------------------------------------------------------------------
-module Main where
+module Main (main) where
 -----------------------------------------------------------------------------
-import           Control.Monad.State
-import           Data.Aeson
-import           Data.Bool
-import           GHC.Generics
+import           Data.IntSet (IntSet)
+import qualified Data.IntSet as IS
+import qualified Data.Map.Strict as M
 -----------------------------------------------------------------------------
-import           Miso
-import           Miso.String (MisoString)
-import qualified Miso.String as S
-import qualified Miso.Style as CSS
+import           Miso hiding (on)
+import           Miso.Lens
 -----------------------------------------------------------------------------
-#if WASM
+import           WebSocket
+-----------------------------------------------------------------------------
+#ifdef WASM
 foreign export javascript "hs_start" main :: IO ()
 #endif
+-----------------------------------------------------------------------------
+data Action
+  = AddWebSocket
+  | Close Int
+  | NoOp
+-----------------------------------------------------------------------------
+data Model = Model
+  { _nextConnection :: Int
+  , _connections :: IntSet
+  } deriving Eq
+-----------------------------------------------------------------------------
+nextConnection :: Lens Model Int
+nextConnection = lens _nextConnection $ \r x -> r { _nextConnection = x }
+-----------------------------------------------------------------------------
+connections :: Lens Model IntSet
+connections = lens _connections $ \r x -> r { _connections = x }
 -----------------------------------------------------------------------------
 main :: IO ()
 main = run (startApp app)
 -----------------------------------------------------------------------------
 app :: App Model Action
-app = (component emptyModel updateModel appView)
-  { events = defaultEvents <> keyboardEvents
-  , subs =
-    [ websocketSub url protocols HandleWebSocket
-    ]
+app = (component emptyModel update_ appView)
+  { events = M.singleton "click" False
+  , mailbox = checkMail Close (const NoOp)
+#ifndef WASM
+  , styles = [ Href "assets/style.css" ]
+#endif
   } where
-      url = URL "wss://echo.websocket.org"
-      protocols = Protocols []
------------------------------------------------------------------------------
-emptyModel :: Model
-emptyModel = Model (Message "") mempty
------------------------------------------------------------------------------
-updateModel :: Action -> Transition Model Action
-updateModel (HandleWebSocket (WebSocketMessage (Message m))) =
-  modify $ \model -> model { received = m }
-updateModel (SendMessage msg) =
-  io_ (send msg)
-updateModel (UpdateMessage m) = do
-  modify $ \model -> model { msg = Message m }
-updateModel _ = pure ()
------------------------------------------------------------------------------
-instance ToJSON Message
-instance FromJSON Message
------------------------------------------------------------------------------
-newtype Message = Message MisoString
-  deriving (Eq, Show, Generic)
------------------------------------------------------------------------------
-data Action
-  = HandleWebSocket (WebSocket Message)
-  | SendMessage Message
-  | UpdateMessage MisoString
-  | Id
------------------------------------------------------------------------------
-data Model = Model
-  { msg :: Message
-  , received :: MisoString
-  } deriving (Show, Eq)
+     emptyModel = Model 0 mempty
+     update_ (Close x) = do
+       connections %= IS.delete x
+     update_ AddWebSocket = do
+       nextConnection += 1
+       connId <- use nextConnection
+       connections %= IS.insert connId
+     update_ NoOp =
+       pure ()
 -----------------------------------------------------------------------------
 appView :: Model -> View Model Action
-appView Model{..} =
-    div_
-        [ CSS.style_ [ CSS.textAlign "center" ] ]
-        [ link_ [rel_ "stylesheet", href_ "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.3/css/bulma.min.css"]
-        , h1_ [ CSS.style_ [CSS.fontWeight "bold"]
-              ]
-          [ a_
-            [ href_ "https://github.com/dmjio/miso"]
-            [ text $ S.pack "Miso Websocket Example"]
-          ]
-        , h3_ [] [text $ S.pack "wss://echo.websocket.org"]
-        , input_
-            [ type_ "text"
-            , onInput UpdateMessage
-            , onEnter (SendMessage msg)
-            ]
-        , button_
-            [ onClick (SendMessage msg)
-            ]
-            [text (S.pack "Send to echo server")]
-        , div_ [] [p_ [] [text received | not . S.null $ received]]
+appView m =
+  div_
+    [ class_ "container"
+    ]
+    [ h1_
+      []
+      [ "🍜 miso-websocket ⚡"
+      ]
+    , div_
+      [ class_ "controls" ]
+      [ button_
+        [ class_ "btn btn-primary"
+        , id_ "add-websocket-btn"
+        , onClick AddWebSocket
         ]
------------------------------------------------------------------------------
-onEnter :: Action -> Attribute Action
-onEnter action = onKeyDown $ bool Id action . (== KeyCode 13)
+        [ "Add New WebSocket"
+        ]
+      ]
+    , div_
+      [ class_ "websockets-container"
+      , id_ "websockets-container"
+      ] -- the syncChildren case should kick in here as well
+      [ div_ [ key_ connId ] +> websocketComponent connId
+      | connId <- IS.toList (m ^. connections)
+      ]
+    ]
 -----------------------------------------------------------------------------

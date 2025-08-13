@@ -18,10 +18,12 @@ executable app
     wasm, warnings
   hs-source-dirs:
     src
+  other-modules:
+    WebSocket
   main-is:
     Main.hs
   build-depends:
-    base, aeson, miso, mtl
+    base, aeson, miso, mtl, jsaddle, containers
   default-language:
     GHC2021
   default-extensions:
