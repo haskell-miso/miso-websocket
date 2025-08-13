@@ -16,6 +16,7 @@ import qualified Data.Map.Strict as M
 -----------------------------------------------------------------------------
 import           Miso hiding (on)
 import           Miso.Lens
+import qualified Miso.Style as CSS
 -----------------------------------------------------------------------------
 import           WebSocket
 -----------------------------------------------------------------------------
@@ -60,9 +61,24 @@ app = (component emptyModel update_ appView)
      update_ NoOp =
        pure ()
 -----------------------------------------------------------------------------
+githubStar :: View model action
+githubStar = iframe_
+    [ title_ "GitHub"
+    , height_ "30"
+    , width_ "170"
+    , textProp "scrolling" "0"
+    , textProp "frameborder" "0"
+    , src_
+      "https://ghbtns.com/github-btn.html?user=haskell-miso&repo=miso-websocket&type=star&count=true&size=large"
+    ]
+    []
+-----------------------------------------------------------------------------
 appView :: Model -> View Model Action
 appView m =
   div_
+  []
+  [ githubStar
+  , div_
     [ class_ "container"
     ]
     [ h1_
@@ -87,4 +103,5 @@ appView m =
       | connId <- IS.toList (m ^. connections)
       ]
     ]
+  ]
 -----------------------------------------------------------------------------
