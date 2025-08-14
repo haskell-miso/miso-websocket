@@ -10,6 +10,7 @@
 -----------------------------------------------------------------------------
 module WebSocket (websocketComponent) where
 -----------------------------------------------------------------------------
+import           Control.Monad (unless)
 import           Data.Bool
 import           GHC.Generics
 import           Language.Javascript.JSaddle hiding (create)
@@ -18,6 +19,7 @@ import           Miso hiding (on)
 import           Miso.Lens
 import           Miso.WebSocket
 import           Miso.String (ToMisoString)
+import qualified Miso.String as MS
 -----------------------------------------------------------------------------
 data Message
   = Message
@@ -83,11 +85,12 @@ websocketComponent box =
     updateModel = \case
       Send -> do
         message <- use msg
-        io (SendMessage <$> toJSVal message)
-        io $ do
-          date <- newDate
-          dateString <- date & toLocaleString
-          pure $ Append (Message dateString message CLIENT)
+        unless (MS.null message) $ do 
+          io (SendMessage <$> toJSVal message)
+          io $ do
+            date <- newDate
+            dateString <- date & toLocaleString
+            pure $ Append (Message dateString message CLIENT)
       SendMessage message -> do
         socket <- use websocket
         send socket message
