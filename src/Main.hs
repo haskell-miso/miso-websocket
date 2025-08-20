@@ -51,7 +51,7 @@ app = (component emptyModel update_ appView)
 #endif
   } where
      emptyModel = Model 0 mempty
-     update_ (Close x) = do
+     update_ (Close x) =
        connections %= IS.delete x
      update_ AddWebSocket = do
        nextConnection += 1

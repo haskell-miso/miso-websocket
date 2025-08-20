@@ -13,7 +13,6 @@ module WebSocket (websocketComponent) where
 import           Control.Monad (unless)
 import           Data.Bool
 import           GHC.Generics
-import           Language.Javascript.JSaddle hiding (create)
 -----------------------------------------------------------------------------
 import           Miso hiding (on)
 import           Miso.Lens
@@ -36,11 +35,11 @@ instance ToMisoString Origin where
 -----------------------------------------------------------------------------
 data Action
   = OnOpen WebSocket
-  | OnMessage JSVal
+  | OnMessage MisoString
   | OnClosed Closed
-  | OnError JSVal
+  | OnError MisoString
   | Send
-  | SendMessage JSVal
+  | SendMessage MisoString
   | Update MisoString
   | Append Message
   | Connect
@@ -84,19 +83,23 @@ websocketComponent box =
   where
     updateModel = \case
       Send -> do
-        message <- use msg
-        unless (MS.null message) $ do 
-          io (SendMessage <$> toJSVal message)
+        m <- use msg
+        unless (MS.null m) $ do
+          issue (SendMessage m)
           io $ do
             date <- newDate
             dateString <- date & toLocaleString
-            pure $ Append (Message dateString message CLIENT)
-      SendMessage message -> do
+            pure $ Append (Message dateString m CLIENT)
+      SendMessage m -> do
         socket <- use websocket
-        send socket message
+        sendText socket m
       Connect ->
-        connect "wss://echo.websocket.org"
-          OnOpen OnClosed OnMessage OnError
+        connectText
+          "wss://echo.websocket.org"
+          OnOpen
+          OnClosed
+          OnMessage
+          OnError
       OnOpen socket -> do
         websocket .= socket
         connected .= True
@@ -109,16 +112,15 @@ websocketComponent box =
           pure $ Append (Message dateString "Disconnected..." SYSTEM)
       OnMessage message ->
         io $ do
-          message_ <- fromJSValUnchecked message
           date <- newDate
           dateString <- date & toLocaleString
-          pure $ Append (Message dateString message_ SERVER)
+          pure $ Append (Message dateString message SERVER)
       Append message ->
         received %= (message :)
       OnError err ->
         io_ $ do
           consoleLog "Error received"
-          consoleLog' err
+          consoleLog err
       Update input ->
         msg .= input
       NoOp ->
