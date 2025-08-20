@@ -13,7 +13,6 @@ module WebSocket (websocketComponent) where
 import           Control.Monad (unless)
 import           Data.Bool
 import           GHC.Generics
-import           Language.Javascript.JSaddle hiding (create)
 -----------------------------------------------------------------------------
 import           Miso hiding (on)
 import           Miso.Lens
@@ -36,11 +35,11 @@ instance ToMisoString Origin where
 -----------------------------------------------------------------------------
 data Action
   = OnOpen WebSocket
-  | OnMessage JSVal
+  | OnMessage (Payload ())
   | OnClosed Closed
-  | OnError JSVal
+  | OnError MisoString
   | Send
-  | SendMessage JSVal
+  | SendMessage MisoString
   | Update MisoString
   | Append Message
   | Connect
@@ -86,14 +85,14 @@ websocketComponent box =
       Send -> do
         message <- use msg
         unless (MS.null message) $ do 
-          io (SendMessage <$> toJSVal message)
+          issue (SendMessage message)
           io $ do
             date <- newDate
             dateString <- date & toLocaleString
             pure $ Append (Message dateString message CLIENT)
       SendMessage message -> do
         socket <- use websocket
-        send socket message
+        sendText socket message
       Connect ->
         connect "wss://echo.websocket.org"
           OnOpen OnClosed OnMessage OnError
@@ -107,18 +106,16 @@ websocketComponent box =
           dateString <- date & toLocaleString
           consoleLog $ ms (show closed)
           pure $ Append (Message dateString "Disconnected..." SYSTEM)
-      OnMessage message ->
-        io $ do
-          message_ <- fromJSValUnchecked message
+      OnMessage payload -> case payload of
+        (TEXT message) -> io $ do
           date <- newDate
           dateString <- date & toLocaleString
-          pure $ Append (Message dateString message_ SERVER)
+          pure $ Append (Message dateString message SERVER)
+        _ -> pure ()
       Append message ->
         received %= (message :)
       OnError err ->
-        io_ $ do
-          consoleLog "Error received"
-          consoleLog' err
+        io_ $ consoleLog $ "Error received: " <> err
       Update input ->
         msg .= input
       NoOp ->
