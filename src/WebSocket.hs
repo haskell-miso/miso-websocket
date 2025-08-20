@@ -111,7 +111,14 @@ websocketComponent box =
           date <- newDate
           dateString <- date & toLocaleString
           pure $ Append (Message dateString message SERVER)
-        _ -> pure ()
+        (JSON json) -> io $ do
+          date <- newDate
+          dateString <- date & toLocaleString
+          pure $ Append (Message dateString (ms $ show json) SERVER)
+        _ -> io $ do
+          date <- newDate
+          dateString <- date & toLocaleString
+          pure $ Append (Message dateString "<received blob or buffer>" SERVER)
       Append message ->
         received %= (message :)
       OnError err ->
