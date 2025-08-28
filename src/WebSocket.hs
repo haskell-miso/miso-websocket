@@ -89,11 +89,11 @@ websocketComponent box =
         m <- use msg
         unless (MS.null m) $ do
           issue (SendMessage m)
+          msg .= ""
           io $ do
             date <- newDate
             dateString <- date & toLocaleString
             pure $ Append (Message dateString m CLIENT)
-         msg .= mempty
       SendMessage m -> do
         socket <- use websocket
         sendText socket m
@@ -121,10 +121,8 @@ websocketComponent box =
           pure $ Append (Message dateString message SERVER)
       Append message ->
         received %= (message :)
-      OnError err ->
-        io_ $ do
-          consoleLog "Error received"
-          consoleLog err
+      OnError errorMessage ->
+        io_ (consoleError errorMessage)
       Update input ->
         msg .= input
       NoOp ->
