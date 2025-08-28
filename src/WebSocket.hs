@@ -31,7 +31,10 @@ data Origin = CLIENT | SYSTEM | SERVER
   deriving (Eq, Show, Generic)
 -----------------------------------------------------------------------------
 instance ToMisoString Origin where
-  toMisoString = ms . show
+  toMisoString = \case
+    CLIENT -> "CLIENT"
+    SYSTEM -> "SYSTEM"
+    SERVER -> "SERVER"
 -----------------------------------------------------------------------------
 data Action
   = OnOpen WebSocket
@@ -90,6 +93,7 @@ websocketComponent box =
             date <- newDate
             dateString <- date & toLocaleString
             pure $ Append (Message dateString m CLIENT)
+         msg .= mempty
       SendMessage m -> do
         socket <- use websocket
         sendText socket m
@@ -129,7 +133,8 @@ websocketComponent box =
         broadcast box
       Disconnect ->
         close =<< use websocket
-      Clear ->
+      Clear -> do
+        msg .= ""
         received .= []
 -----------------------------------------------------------------------------
 onEnter :: Action -> Attribute Action
@@ -227,7 +232,8 @@ viewModel m =
 -----------------------------------------------------------------------------
 messageHeader :: [Message] -> [ View model action ]
 messageHeader messages = concat
-  [ [ div_
+  [ 
+    [ div_
       [ class_ "message-header" ]
       [ span_ [class_ "message-origin"] [ text (ms origin) ]
       , span_ [class_ "timestamp"] [ text dateString ]
