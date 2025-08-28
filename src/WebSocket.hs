@@ -57,6 +57,7 @@ data Model = Model
   , _websocket :: WebSocket
   , _connected :: Bool
   , _connections :: [WebSocket]
+  , _clearInput :: Bool
   , _boxId :: Int
   } deriving Eq
 -----------------------------------------------------------------------------
@@ -72,11 +73,14 @@ websocket = lens _websocket $ \r x -> r { _websocket = x }
 connected :: Lens Model Bool
 connected = lens _connected $ \r x -> r { _connected = x }
 -----------------------------------------------------------------------------
+clearInput :: Lens Model Bool
+clearInput = lens _clearInput $ \r x -> r { _clearInput = x }
+-----------------------------------------------------------------------------
 boxId :: Lens Model Int
 boxId = lens _boxId $ \r x -> r { _boxId = x }
 -----------------------------------------------------------------------------
 emptyModel :: Int -> Model
-emptyModel = Model mempty [] emptyWebSocket False []
+emptyModel = Model mempty [] emptyWebSocket False [] True
 -----------------------------------------------------------------------------
 websocketComponent :: Int -> Component parent Model Action
 websocketComponent box =
@@ -89,6 +93,7 @@ websocketComponent box =
         m <- use msg
         unless (MS.null m) $ do
           issue (SendMessage m)
+          clearInput .= True
           msg .= ""
           io $ do
             date <- newDate
@@ -123,7 +128,8 @@ websocketComponent box =
         received %= (message :)
       OnError errorMessage ->
         io_ (consoleError errorMessage)
-      Update input ->
+      Update input -> do
+        clearInput .= False
         msg .= input
       NoOp ->
         pure ()
@@ -132,6 +138,7 @@ websocketComponent box =
       Disconnect ->
         close =<< use websocket
       Clear -> do
+        clearInput .= True
         msg .= ""
         received .= []
 -----------------------------------------------------------------------------
@@ -204,6 +211,9 @@ viewModel m =
         ] ++
         [ disabled_
         | not (m ^. connected)
+        ] ++
+        [ value_ ""
+        | m ^. clearInput
         ]
       , optionalAttrs
         button_
