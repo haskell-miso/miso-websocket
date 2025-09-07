@@ -196,11 +196,11 @@
       },
       "locked": {
         "host": "gitlab.haskell.org",
-        "lastModified": 1751372331,
-        "narHash": "sha256-1bBo0DJ8SBmKkJJAHpJedwgayvEIJK7DHrLt2bN4+q4=",
+        "lastModified": 1756685280,
+        "narHash": "sha256-XXi1OmL9SeS4a+dwtjr9waBf1rwQNRpi2RcBp4sNSTc=",
         "owner": "haskell-wasm",
         "repo": "ghc-wasm-meta",
-        "rev": "7927129e42bcd6a54b9e06e26455803fa4878261",
+        "rev": "a3d155c399021c8bf387f52c8f902f3c6633fb30",
         "type": "gitlab"
       },
       "original": {
@@ -561,17 +561,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1748063550,
-        "narHash": "sha256-xJ3BLiFtQmH92Y0jqIgdzJqidQHm3M1ZKHRAUEgNZF0=",
+        "lastModified": 1756701389,
+        "narHash": "sha256-WUXl+5QfhsZKf6V+h0qhl6Jgy6SzR3HzMQsfbWL0jkE=",
         "owner": "ghcjs",
         "repo": "jsaddle",
-        "rev": "2513cd19184376ac8a2f0e3797a1ae7d2e522e87",
+        "rev": "0fb7260ad02592546c9f180078d770256fb1f0f6",
         "type": "github"
       },
       "original": {
         "owner": "ghcjs",
         "repo": "jsaddle",
-        "rev": "2513cd19184376ac8a2f0e3797a1ae7d2e522e87",
+        "rev": "0fb7260ad02592546c9f180078d770256fb1f0f6",
         "type": "github"
       }
     },
@@ -584,11 +584,11 @@
         "servant": "servant"
       },
       "locked": {
-        "lastModified": 1755712825,
-        "narHash": "sha256-zT3YMWrB8yTE5BvReRanNbYf7r7qW1gdgpLYt29pbK4=",
+        "lastModified": 1757208623,
+        "narHash": "sha256-xjxCKi7qsPCjSDvJar+RRJmuZVoHZDl2QmsAaHOrHWA=",
         "owner": "dmjio",
         "repo": "miso",
-        "rev": "b150a33493e45eba0c32a52d8115120bb0d9ec04",
+        "rev": "fddd4c95866523cbb97164c6d6193b89aa4c94be",
         "type": "github"
       },
       "original": {
@@ -599,11 +599,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1750731501,
-        "narHash": "sha256-Ah4qq+SbwMaGkuXCibyg+Fwn00el4KmI3XFX6htfDuk=",
+        "lastModified": 1755767206,
+        "narHash": "sha256-yi+50PemAF64H5sA4Bl3RYzz3Yniw0538SPLl3DxGU0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "69dfebb3d175bde602f612915c5576a41b18486b",
+        "rev": "f90bda01c396f058bfe42d0cecb4ba776160a953",
         "type": "github"
       },
       "original": {

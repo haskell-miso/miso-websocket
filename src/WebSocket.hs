@@ -15,6 +15,8 @@ import           Data.Bool
 import           GHC.Generics
 -----------------------------------------------------------------------------
 import           Miso hiding (on)
+import           Miso.Html
+import           Miso.Html.Property
 import           Miso.Lens
 import           Miso.WebSocket
 import           Miso.String (ToMisoString)

@@ -15,6 +15,8 @@ import qualified Data.IntSet as IS
 import qualified Data.Map.Strict as M
 -----------------------------------------------------------------------------
 import           Miso hiding (on)
+import           Miso.Html hiding (title_)
+import           Miso.Html.Property
 import           Miso.Lens
 -----------------------------------------------------------------------------
 import           WebSocket
