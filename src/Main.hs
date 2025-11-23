@@ -84,7 +84,12 @@ appView m =
     ]
     [ h1_
       []
-      [ "🍜 miso-websocket ⚡"
+      [ "🍜 "
+      , a_
+        [ href_ "https://github.com/haskell-miso/miso-websocket" ]
+        [ "miso-websocket"
+        ]
+      , " ⚡" 
       ]
     , div_
       [ class_ "controls" ]
