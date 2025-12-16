@@ -46,7 +46,7 @@ main = run (startApp app)
 -----------------------------------------------------------------------------
 app :: App Model Action
 app = (component emptyModel update_ appView)
-  { events = M.singleton "click" BUBBLE
+  { events = defaultEvents
   , mailbox = checkMail Close (const NoOp)
 #ifndef WASM
   , styles = [ Href "assets/style.css" ]
