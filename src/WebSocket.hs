@@ -11,7 +11,6 @@
 module WebSocket (websocketComponent) where
 -----------------------------------------------------------------------------
 import           Control.Monad (unless)
-import           Data.Bool
 import           GHC.Generics
 -----------------------------------------------------------------------------
 import           Miso hiding (on)
@@ -144,9 +143,6 @@ websocketComponent box =
         msg .= ""
         received .= []
 -----------------------------------------------------------------------------
-onEnter :: Action -> Attribute Action
-onEnter action = onKeyDown $ bool NoOp action . (== KeyCode 13)
------------------------------------------------------------------------------
 viewModel :: Model -> View Model Action
 viewModel m =
   div_
@@ -208,7 +204,7 @@ viewModel m =
         [ placeholder_ "Type a message..."
         , class_ "input-field message-input"
         , onInput Update
-        , onEnter Send
+        , onEnter NoOp Send
         , type_ "text"
         ] ++
         [ disabled_

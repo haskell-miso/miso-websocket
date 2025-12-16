@@ -46,7 +46,7 @@ main = run (startApp app)
 -----------------------------------------------------------------------------
 app :: App Model Action
 app = (component emptyModel update_ appView)
-  { events = M.singleton "click" False
+  { events = M.singleton "click" BUBBLE
   , mailbox = checkMail Close (const NoOp)
 #ifndef WASM
   , styles = [ Href "assets/style.css" ]
@@ -105,7 +105,7 @@ appView m =
       [ class_ "websockets-container"
       , id_ "websockets-container"
       ] -- the syncChildren case should kick in here as well
-      [ div_ [ key_ connId ] +> websocketComponent connId
+      [ div_ [ key_ connId ] [ mount (websocketComponent connId) ]
       | connId <- IS.toList (m ^. connections)
       ]
     ]
