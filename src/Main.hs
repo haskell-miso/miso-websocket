@@ -12,7 +12,6 @@ module Main (main) where
 -----------------------------------------------------------------------------
 import           Data.IntSet (IntSet)
 import qualified Data.IntSet as IS
-import qualified Data.Map.Strict as M
 -----------------------------------------------------------------------------
 import           Miso hiding (on)
 import           Miso.Html hiding (title_)

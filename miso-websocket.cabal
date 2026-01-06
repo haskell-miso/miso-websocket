@@ -23,7 +23,7 @@ executable app
   main-is:
     Main.hs
   build-depends:
-    base, aeson, miso, mtl, jsaddle, containers
+    base, miso, containers
   default-language:
     GHC2021
   default-extensions:
