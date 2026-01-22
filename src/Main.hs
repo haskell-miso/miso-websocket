@@ -41,12 +41,11 @@ connections :: Lens Model IntSet
 connections = lens _connections $ \r x -> r { _connections = x }
 -----------------------------------------------------------------------------
 main :: IO ()
-main = run (startApp app)
+main = run (startApp (keyboardEvents <> defaultEvents) app)
 -----------------------------------------------------------------------------
 app :: App Model Action
 app = (component emptyModel update_ appView)
-  { events = defaultEvents
-  , mailbox = checkMail Close (const NoOp)
+  { mailbox = checkMail Close (const NoOp)
 #ifndef WASM
   , styles = [ Href "assets/style.css" ]
 #endif

@@ -84,10 +84,7 @@ emptyModel :: Int -> Model
 emptyModel = Model mempty [] emptyWebSocket False [] True
 -----------------------------------------------------------------------------
 websocketComponent :: Int -> Component parent Model Action
-websocketComponent box =
-  (component (emptyModel box) updateModel viewModel)
-    { events = defaultEvents <> keyboardEvents
-    }
+websocketComponent box = component (emptyModel box) updateModel viewModel
   where
     updateModel = \case
       Send -> do
