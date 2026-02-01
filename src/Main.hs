@@ -103,7 +103,7 @@ appView m =
       [ class_ "websockets-container"
       , id_ "websockets-container"
       ] -- the syncChildren case should kick in here as well
-      [ div_ [ key_ connId ] [ mount (websocketComponent connId) ]
+      [ div_ [ key_ connId ] [ mount_ (websocketComponent connId) ]
       | connId <- IS.toList (m ^. connections)
       ]
     ]
