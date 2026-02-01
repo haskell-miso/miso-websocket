@@ -41,7 +41,7 @@ connections :: Lens Model IntSet
 connections = lens _connections $ \r x -> r { _connections = x }
 -----------------------------------------------------------------------------
 main :: IO ()
-main = run (startApp (keyboardEvents <> defaultEvents) app)
+main = startApp (keyboardEvents <> defaultEvents) app
 -----------------------------------------------------------------------------
 app :: App Model Action
 app = (component emptyModel update_ appView)
